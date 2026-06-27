@@ -1,6 +1,6 @@
 # Choreo - Database Migrations
 
-This repo creates database migrations for the Choreo app. This allows a user to easily spin up the required Postgres tables to run the app.
+This repo uses [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html) to create database migrations for the Choreo app. This allows a user to easily spin up the required Postgres tables to run the app.
 
 ## Pre-requisites
 
