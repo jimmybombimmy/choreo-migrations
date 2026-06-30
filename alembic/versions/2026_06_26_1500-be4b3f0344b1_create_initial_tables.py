@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
+    """Create initial tables."""
     op.create_table(
         "task_types",
         Column("id", UUID, primary_key=True),
@@ -65,7 +65,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
+    """Remove initial tables."""
     op.drop_table("tasks")
     op.drop_table("task_lists")
     op.drop_table("collections")
