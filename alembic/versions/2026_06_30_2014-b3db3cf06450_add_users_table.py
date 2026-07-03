@@ -9,7 +9,7 @@ Create Date: 2026-06-30 20:14:59.130722
 from typing import Sequence, Union
 
 from alembic import op
-from sqlalchemy import Column, UUID, VARCHAR, TIMESTAMP, func, ARRAY, ForeignKey
+from sqlalchemy import Column, UUID, VARCHAR, TIMESTAMP, func, ARRAY
 
 # revision identifiers, used by Alembic.
 revision: str = "b3db3cf06450"
@@ -29,11 +29,11 @@ def upgrade() -> None:
         Column("password", VARCHAR(30), nullable=False),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
-        Column("task_list_ids", ARRAY(UUID)),  # UUIDs of "collections.id"
+        Column("task_list_ids", ARRAY(UUID)),
     )
     pass
 
-    op.add_column("task_lists", Column("user_ids", ARRAY(UUID)))  # UUIDs of "users.id"
+    op.add_column("task_lists", Column("user_ids", ARRAY(UUID)))
 
 
 def downgrade() -> None:

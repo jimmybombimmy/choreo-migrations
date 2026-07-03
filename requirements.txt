@@ -1,0 +1,10 @@
+alembic==1.18.4
+dotenv==0.9.9
+factory-boy==3.3.3
+faker==40.28.1
+mako==1.3.12
+markupsafe==3.0.3
+psycopg2-binary==2.9.12
+python-dotenv==1.2.2
+sqlalchemy==2.0.51
+typing-extensions==4.15.0
