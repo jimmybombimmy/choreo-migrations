@@ -22,7 +22,7 @@ def upgrade() -> None:
     """Create initial tables."""
     op.create_table(
         "task_types",
-        Column("id", UUID, primary_key=True),
+        Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
         Column("description", VARCHAR(140)),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
@@ -31,10 +31,10 @@ def upgrade() -> None:
 
     op.create_table(
         "collections",
-        Column("id", UUID, primary_key=True),
+        Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
         Column("description", VARCHAR(140)),
-        Column("task_type_id", UUID, ForeignKey("task_types.id")),
+        Column("task_type_id", UUID(as_uuid=True), ForeignKey("task_types.id")),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),
@@ -42,9 +42,9 @@ def upgrade() -> None:
 
     op.create_table(
         "task_lists",
-        Column("id", UUID, primary_key=True),
+        Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
-        Column("collection_id", UUID, ForeignKey("collections.id")),
+        Column("collection_id", UUID(as_uuid=True), ForeignKey("collections.id")),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),
@@ -53,14 +53,14 @@ def upgrade() -> None:
 
     op.create_table(
         "tasks",
-        Column("id", UUID, primary_key=True),
+        Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
-        Column("task_list_id", UUID, ForeignKey("task_lists.id")),
+        Column("task_list_id", UUID(as_uuid=True), ForeignKey("task_lists.id")),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("completed", BOOLEAN),
         Column("locked", BOOLEAN),
-        Column("parent_task_id", UUID, ForeignKey("tasks.id")),
+        Column("parent_task_id", UUID(as_uuid=True), ForeignKey("tasks.id")),
     )
 
 
