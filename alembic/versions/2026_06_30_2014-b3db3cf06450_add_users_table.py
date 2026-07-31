@@ -9,7 +9,16 @@ Create Date: 2026-06-30 20:14:59.130722
 from typing import Sequence, Union
 
 from alembic import op
-from sqlalchemy import Column, UUID, VARCHAR, TIMESTAMP, func, ARRAY, ForeignKey
+from sqlalchemy import (
+    Column,
+    UUID,
+    VARCHAR,
+    TIMESTAMP,
+    func,
+    ARRAY,
+    ForeignKey,
+    UniqueConstraint,
+)
 
 # revision identifiers, used by Alembic.
 revision: str = "b3db3cf06450"
@@ -20,24 +29,53 @@ depends_on: Union[str, Sequence[str], None] = None
 
 # This will definitely need better authentication in the future
 def upgrade() -> None:
-    """Add users table and add users column to task_lists."""
+    """
+    Add "users" table.
+
+    Add "user_task_list_membership" to link many-to-many unique relationships between users and task_lists.
+    This will be to allow users to get their task list and see other users that have access.
+    """
+
     op.create_table(
         "users",
-        Column("id", UUID, primary_key=True),
+        Column("id", UUID(as_uuid=True), primary_key=True),
         Column("username", VARCHAR(30), nullable=False),
         Column("email", VARCHAR(254), nullable=False),
         Column("password", VARCHAR(30), nullable=False),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
-        Column("task_list_ids", ARRAY(UUID)),  # UUIDs of "collections.id"
     )
-    pass
-
-    op.add_column("task_lists", Column("user_ids", ARRAY(UUID)))  # UUIDs of "users.id"
+    op.create_table(
+        "user_task_list_membership",
+        Column(
+            "user_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
+        Column(
+            "task_list_id",
+            UUID(as_uuid=True),
+            ForeignKey("task_lists.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
+        Column(
+            "role",
+            VARCHAR(20),
+            nullable=False,
+            server_default="viewer",
+        ),
+        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
+        Column("updated_at", TIMESTAMP),
+        UniqueConstraint(
+            "user_id",
+            "task_list_id",
+            name="uq_user_task_list_membership",
+        ),
+    )
 
 
 def downgrade() -> None:
     """Remove users table."""
+    op.drop_table("user_task_list_link")
     op.drop_table("users")
-    op.drop_column("task_lists", "user_ids")
-    pass
