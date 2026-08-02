@@ -1,4 +1,4 @@
-"""Add users table
+"""Add users and user_task_list_memberships tables
 
 Revision ID: b3db3cf06450
 Revises: be4b3f0344b1
@@ -15,9 +15,9 @@ from sqlalchemy import (
     VARCHAR,
     TIMESTAMP,
     func,
-    ARRAY,
     ForeignKey,
     UniqueConstraint,
+    Enum,
 )
 
 # revision identifiers, used by Alembic.
@@ -46,7 +46,7 @@ def upgrade() -> None:
         Column("updated_at", TIMESTAMP),
     )
     op.create_table(
-        "user_task_list_membership",
+        "user_task_list_memberships",
         Column(
             "user_id",
             UUID(as_uuid=True),
@@ -61,8 +61,15 @@ def upgrade() -> None:
         ),
         Column(
             "role",
-            VARCHAR(20),
+            Enum(
+                "viewer",
+                "editor",
+                "admin",
+                "superadmin",
+                name="utlm_roles",
+            ),
             nullable=False,
+            default="viewer",
             server_default="viewer",
         ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
@@ -77,5 +84,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Remove users table."""
-    op.drop_table("user_task_list_link")
+    op.drop_table("user_task_list_memberships")
     op.drop_table("users")
+
+    op.execute("DROP TYPE utlm_roles")
