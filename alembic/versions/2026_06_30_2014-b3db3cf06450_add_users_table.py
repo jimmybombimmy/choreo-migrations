@@ -50,13 +50,13 @@ def upgrade() -> None:
         Column(
             "user_id",
             UUID(as_uuid=True),
-            ForeignKey("users.id", ondelete="CASCADE"),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_utlm_user"),
             primary_key=True,
         ),
         Column(
             "task_list_id",
             UUID(as_uuid=True),
-            ForeignKey("task_lists.id", ondelete="CASCADE"),
+            ForeignKey("task_lists.id", ondelete="CASCADE", name="fk_utlm_task_list"),
             primary_key=True,
         ),
         Column(
