@@ -85,7 +85,7 @@ def upgrade() -> None:
             "role",
             utlm_roles,
             nullable=False,
-            server_default="viewer",
+            server_default="VIEWER",
         ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
