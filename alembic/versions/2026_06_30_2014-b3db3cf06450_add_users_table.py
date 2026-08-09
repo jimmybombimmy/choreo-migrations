@@ -16,7 +16,6 @@ from sqlalchemy import (
     TIMESTAMP,
     func,
     ForeignKey,
-    UniqueConstraint,
     Enum,
 )
 
@@ -35,10 +34,10 @@ invitation_status = Enum(
 )
 
 utlm_roles = Enum(
-    "viewer",
-    "editor",
-    "admin",
-    "superadmin",
+    "VIEWER",
+    "EDITOR",
+    "ADMIN",
+    "SUPERADMIN",
     name="utlm_roles",
 )
 
@@ -50,6 +49,12 @@ def upgrade() -> None:
 
     Add "user_task_list_membership" to link many-to-many unique relationships between users and task_lists.
     This will be to allow users to get their task list and see other users that have access.
+
+    Add "collection_task_list_membership" to link similar to above
+
+    Add "user_id" column to collections (this doesn't need many-to-many)
+
+    Add invitation tables for task_lists and collections so that users can invite other users to join
     """
 
     op.create_table(
