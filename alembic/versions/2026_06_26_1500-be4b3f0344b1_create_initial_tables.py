@@ -20,28 +20,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create initial tables."""
-    op.create_table(
-        "task_types",
-        Column("id", UUID(as_uuid=True), primary_key=True),
-        Column("name", VARCHAR(30), nullable=False),
-        Column("description", VARCHAR(140)),
-        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
-        Column("updated_at", TIMESTAMP),
-    )
 
     op.create_table(
         "collections",
         Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
         Column("description", VARCHAR(140)),
-        Column(
-            "task_type_id",
-            UUID(as_uuid=True),
-            ForeignKey(
-                "task_types.id",
-                name="fk_collections_task_type",
-            ),
-        ),
+        Column("task_type", VARCHAR(30)),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),
@@ -84,5 +69,4 @@ def downgrade() -> None:
     op.drop_table("tasks")
     op.drop_table("task_lists")
     op.drop_table("collections")
-    op.drop_table("task_types")
     pass

@@ -26,6 +26,22 @@ down_revision: Union[str, Sequence[str], None] = "be4b3f0344b1"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+invitation_status = Enum(
+    "PENDING",
+    "ACCEPTED",
+    "DECLINED",
+    "EXPIRED",
+    name="invitation_status",
+)
+
+utlm_roles = Enum(
+    "viewer",
+    "editor",
+    "admin",
+    "superadmin",
+    name="utlm_roles",
+)
+
 
 # This will definitely need better authentication in the future
 def upgrade() -> None:
@@ -45,6 +61,7 @@ def upgrade() -> None:
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
     )
+
     op.create_table(
         "user_task_list_memberships",
         Column(
@@ -61,30 +78,120 @@ def upgrade() -> None:
         ),
         Column(
             "role",
-            Enum(
-                "viewer",
-                "editor",
-                "admin",
-                "superadmin",
-                name="utlm_roles",
-            ),
+            utlm_roles,
             nullable=False,
-            default="viewer",
             server_default="viewer",
         ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
-        UniqueConstraint(
+    )
+
+    op.add_column(
+        "collections",
+        Column(
             "user_id",
-            "task_list_id",
-            name="uq_user_task_list_membership",
+            UUID(as_uuid=True),
+            ForeignKey(
+                "users.id",
+                ondelete="CASCADE",
+                name="fk_collections_user",
+            ),
+            nullable=False,
         ),
+    )
+
+    op.create_table(
+        "collection_task_list_memberships",
+        Column(
+            "collection_id",
+            UUID(as_uuid=True),
+            ForeignKey("collections.id", ondelete="CASCADE", name="fk_ctlm_collection"),
+            primary_key=True,
+        ),
+        Column(
+            "task_list_id",
+            UUID(as_uuid=True),
+            ForeignKey("task_lists.id", ondelete="CASCADE", name="fk_ctlm_task_list"),
+            primary_key=True,
+        ),
+        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
+        Column("updated_at", TIMESTAMP),
+    )
+
+    op.create_table(
+        "task_list_invitations",
+        Column("id", UUID(as_uuid=True), primary_key=True),
+        Column(
+            "task_list_id",
+            UUID(as_uuid=True),
+            ForeignKey("task_lists.id", ondelete="CASCADE", name="fk_tli_task_list"),
+            nullable=False,
+        ),
+        Column(
+            "sender_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_tli_sender"),
+            nullable=False,
+        ),
+        Column(
+            "recipient_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_tli_recipient"),
+            nullable=False,
+        ),
+        Column(
+            "status",
+            invitation_status,
+            nullable=False,
+            server_default="PENDING",
+        ),
+        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
+        Column("updated_at", TIMESTAMP),
+    )
+
+    op.create_table(
+        "collection_invitations",
+        Column("id", UUID(as_uuid=True), primary_key=True),
+        Column(
+            "collection_id",
+            UUID(as_uuid=True),
+            ForeignKey("collections.id", ondelete="CASCADE", name="fk_ci_collection"),
+            nullable=False,
+        ),
+        Column(
+            "sender_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_ci_sender"),
+            nullable=False,
+        ),
+        Column(
+            "recipient_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_ci_recipient"),
+            nullable=False,
+        ),
+        Column(
+            "status",
+            invitation_status,
+            nullable=False,
+            server_default="PENDING",
+        ),
+        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
+        Column("updated_at", TIMESTAMP),
     )
 
 
 def downgrade() -> None:
     """Remove users table."""
+    op.drop_table("collection_invitations")
+    op.drop_table("task_list_invitations")
+
+    op.drop_table("collection_task_list_memberships")
     op.drop_table("user_task_list_memberships")
+
+    op.drop_column("collections", "user_id")
+
     op.drop_table("users")
 
-    op.execute("DROP TYPE utlm_roles")
+    utlm_roles.drop(op.get_bind(), checkfirst=True)
+    invitation_status.drop(op.get_bind(), checkfirst=True)
