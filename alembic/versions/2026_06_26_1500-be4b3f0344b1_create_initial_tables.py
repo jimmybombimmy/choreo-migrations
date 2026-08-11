@@ -36,11 +36,6 @@ def upgrade() -> None:
         "task_lists",
         Column("id", UUID(as_uuid=True), primary_key=True),
         Column("name", VARCHAR(30), nullable=False),
-        Column(
-            "collection_id",
-            UUID(as_uuid=True),
-            ForeignKey("collections.id", name="fk_task_lists_collection"),
-        ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),

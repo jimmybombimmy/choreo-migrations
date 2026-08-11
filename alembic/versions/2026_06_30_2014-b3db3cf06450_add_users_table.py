@@ -50,6 +50,8 @@ def upgrade() -> None:
     Add "user_task_list_membership" to link many-to-many unique relationships between users and task_lists.
     This will be to allow users to get their task list and see other users that have access.
 
+    Add "user_collection_membership" to link similar to above
+
     Add "collection_task_list_membership" to link similar to above
 
     Add "user_id" column to collections (this doesn't need many-to-many)
@@ -91,20 +93,6 @@ def upgrade() -> None:
         Column("updated_at", TIMESTAMP),
     )
 
-    op.add_column(
-        "collections",
-        Column(
-            "user_id",
-            UUID(as_uuid=True),
-            ForeignKey(
-                "users.id",
-                ondelete="CASCADE",
-                name="fk_collections_user",
-            ),
-            nullable=False,
-        ),
-    )
-
     op.create_table(
         "collection_task_list_memberships",
         Column(
@@ -117,6 +105,24 @@ def upgrade() -> None:
             "task_list_id",
             UUID(as_uuid=True),
             ForeignKey("task_lists.id", ondelete="CASCADE", name="fk_ctlm_task_list"),
+            primary_key=True,
+        ),
+        Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
+        Column("updated_at", TIMESTAMP),
+    )
+
+    op.create_table(
+        "user_collection_memberships",
+        Column(
+            "collection_id",
+            UUID(as_uuid=True),
+            ForeignKey("collections.id", ondelete="CASCADE", name="fk_ucm_collection"),
+            primary_key=True,
+        ),
+        Column(
+            "user_id",
+            UUID(as_uuid=True),
+            ForeignKey("users.id", ondelete="CASCADE", name="fk_ucm_user"),
             primary_key=True,
         ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
@@ -193,8 +199,7 @@ def downgrade() -> None:
 
     op.drop_table("collection_task_list_memberships")
     op.drop_table("user_task_list_memberships")
-
-    op.drop_column("collections", "user_id")
+    op.drop_table("user_collection_memberships")
 
     op.drop_table("users")
 
