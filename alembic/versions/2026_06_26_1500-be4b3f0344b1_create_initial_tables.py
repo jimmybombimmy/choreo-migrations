@@ -24,9 +24,9 @@ def upgrade() -> None:
     op.create_table(
         "collections",
         Column("id", UUID(as_uuid=True), primary_key=True),
-        Column("name", VARCHAR(30), nullable=False),
+        Column("name", VARCHAR(60), nullable=False),
         Column("description", VARCHAR(140)),
-        Column("task_type", VARCHAR(30)),
+        Column("task_type", VARCHAR(60)),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_table(
         "task_lists",
         Column("id", UUID(as_uuid=True), primary_key=True),
-        Column("name", VARCHAR(30), nullable=False),
+        Column("name", VARCHAR(60), nullable=False),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("last_completed_at", TIMESTAMP),
         Column("updated_at", TIMESTAMP),
@@ -45,7 +45,7 @@ def upgrade() -> None:
     op.create_table(
         "tasks",
         Column("id", UUID(as_uuid=True), primary_key=True),
-        Column("name", VARCHAR(30), nullable=False),
+        Column("name", VARCHAR(60), nullable=False),
         Column(
             "task_list_id",
             UUID(as_uuid=True),
@@ -55,7 +55,6 @@ def upgrade() -> None:
         Column("last_completed_at", TIMESTAMP),
         Column("completed", BOOLEAN),
         Column("locked", BOOLEAN),
-        Column("parent_task_id", UUID(as_uuid=True), ForeignKey("tasks.id")),
     )
 
 
