@@ -33,12 +33,13 @@ invitation_status = Enum(
     name="invitation_status",
 )
 
-utlm_roles = Enum(
-    "VIEWER",
-    "EDITOR",
-    "ADMIN",
-    "SUPERADMIN",
-    name="utlm_roles",
+membership_roles = Enum(
+    "VIEWER",  # can view but not tick anything
+    "USER",  # can view and tick anything
+    "EDITOR",  # can view, tick, add and delete tasks
+    "ADMIN",  # editor + add and remove above roles
+    "OWNER",  # admin + add and remove admin roles
+    name="membership_roles",
 )
 
 
@@ -85,7 +86,7 @@ def upgrade() -> None:
         ),
         Column(
             "role",
-            utlm_roles,
+            membership_roles,
             nullable=False,
             server_default="VIEWER",
         ),
@@ -124,6 +125,12 @@ def upgrade() -> None:
             UUID(as_uuid=True),
             ForeignKey("users.id", ondelete="CASCADE", name="fk_ucm_user"),
             primary_key=True,
+        ),
+        Column(
+            "role",
+            membership_roles,
+            nullable=False,
+            server_default="VIEWER",
         ),
         Column("created_at", TIMESTAMP, server_default=func.now(), nullable=False),
         Column("updated_at", TIMESTAMP),
@@ -203,5 +210,5 @@ def downgrade() -> None:
 
     op.drop_table("users")
 
-    utlm_roles.drop(op.get_bind(), checkfirst=True)
+    membership_roles.drop(op.get_bind(), checkfirst=True)
     invitation_status.drop(op.get_bind(), checkfirst=True)
